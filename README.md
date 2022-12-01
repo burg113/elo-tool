@@ -10,11 +10,28 @@
 - [Installation](#installation)
 - [License](#license)
 
+
 ## Installation
 
 ```console
 pip install elo-tool
 ```
+
+
+## Config format
+
+currently only [toml](https://toml.io/) is supported.
+
+**default:**
+
+`name = Game`
+
+`default_elo = 800`
+
+`players = ["player1", "player2"]`
+
+`[elo]`
+
 
 ## License
 

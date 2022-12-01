@@ -1,5 +1,7 @@
-from elo_tool import parser
+from elo_tool import __main__
+
 
 if __name__ == "__main__":
-    args = parser.parse_args()
-    print(args)
+    __main__.main()
+
+

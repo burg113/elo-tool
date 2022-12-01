@@ -1,0 +1,19 @@
+# config file should have the toml formatting
+
+name = "Test-Game"
+
+default_elo = 500
+
+players = [
+    "burg113",
+    "player2",
+    "player3",
+    "player4"
+]
+
+
+[elo]
+"burg113" = 1000
+"player2" = 1234
+"player3" = 700
+
