@@ -4,12 +4,17 @@ import elo_tool.other.colors as color
 
 from elo_tool import config, __main__
 
-HELP_RESPONSE = "hi! i will help you eventually. But sadly not currently. ¯\\_(ツ)_/¯ "
+HELP_RESPONSE = "hi! i will help you eventually. But sadly not currently.¯\\_(._.)_/¯"
 
 flag = 0
 FLAGS = {
     "exit": -1
 }
+
+
+# temporary
+def unimplemented():
+    raise Exception("unimplemented")
 
 
 def print_help():
@@ -39,8 +44,21 @@ COMMANDS = {
     "help": 0,
     "exit": 1,
     "exit()": 1,
+
     "config": 10,
-    "loadconfig": 10
+    "loadconfig": 10,
+    "saveconfig": 11,
+
+    "stats": 20,
+    "elo": 20,
+    "players": 21,
+    "player": 21,
+    "game": 22,
+
+    "setplayers": 30,
+    "addplayer": 31,
+    "setplyerelo": 32,
+    "setgame": 33,
 
 }
 
@@ -49,7 +67,16 @@ OPTION_PROPERTIES = {
     1: ["exit", False, lambda: set_flag(-1)],
 
     10: ["load config", True, config.load_config],
-    11: ["save config", True, config.save_config]
+    11: ["save config", True, config.save_config],
+
+    20: ["show stats", False, config.print_stats],
+    21: ["show players", False, config.print_players],
+    22: ["show game", False, config.print_players],
+
+    30: ["set player list", True, unimplemented],
+    31: ["add player", True, unimplemented],
+    32: ["set player elo", True, unimplemented],
+    33: ["set game", True, unimplemented],
 }
 
 
@@ -92,7 +119,7 @@ def parse_args():
     print(color.DEFAULT, end="")
 
 
-def parse_input(input_string):
+def parse_input(input_string) -> int:
     if len(input_string.strip()) == 0:
         return
     command, arg = None, None
@@ -110,10 +137,13 @@ def parse_input(input_string):
         return 0
 
     command_id = COMMANDS[command]
-    if OPTION_PROPERTIES[command_id][1]:
-        OPTION_PROPERTIES[command_id][2](arg)
+    option_properties = OPTION_PROPERTIES[command_id]
+    if option_properties[1]:
+        option_properties[2](arg)
     else:
-        OPTION_PROPERTIES[command_id][2]()
+        if arg is not None and arg != "":
+            print(f'ignoring argument: {arg} as {option_properties[0]} requires no argument')
+        option_properties[2]()
 
     if FLAGS["exit"] == flag:
         return -1

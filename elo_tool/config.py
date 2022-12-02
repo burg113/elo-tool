@@ -1,3 +1,5 @@
+# Todo: refactor
+
 import os.path
 
 import toml
@@ -52,6 +54,32 @@ args = {
 }
 
 
+class Config:
+    # content, header
+    def __init__(self, path=None, content=None, header: str = ""):
+        if content is None:
+            content = {}
+        self.content = content
+        self.header = header
+        if path is not None:
+            self.load(path)
+
+    def load(self, path):
+        if not os.path.isfile(str(path)):
+            print(f"No config file at '{path}'")
+            return
+
+        with open(path, "r") as config_file:
+            self.content = toml.load(path)
+
+    def write(self, path, flag="w"):
+        with open(path, flag) as file:
+            file.write(self.header + "\n" + toml.dumps(self.content))
+
+    def __str__(self):
+        return str(self.content)
+
+
 def initialize():
     apply_config({})
 
@@ -63,22 +91,23 @@ def apply_config(config):
 
 
 def load_config(path):
-    if not os.path.isfile(str(path)):
-        print(f"No config file at '{path}'")
-        return
+    config = Config(str(path))
 
-    with open(path, "r") as config_file:
-        config = toml.load(path)
-
-        apply_config(config)
-
-        game = game_state()
-        pass
+    apply_config(config.content)
 
 
-def save_config(path):
+def generate_config() -> Config:
+    config = Config(header="# this is a automatically generated config\n\n")
+    config.content = {"name": game_name,
+                      "default_elo": default_elo,
+                      "players": players,
+                      "elo": player_elo}
 
-    raise Exception("Not Implemented!")
+    return config
+
+
+def save_config(path: str):
+    generate_config().write(path)
 
 
 def game_state():
@@ -88,3 +117,18 @@ def game_state():
             "players": players,
             "player_elo": player_elo,
             "default_elo": default_elo}
+
+
+def print_stats():
+    print("STATS:")
+    for player, elo in player_elo.items():
+        print(f"{player}\t\t{elo}")
+
+
+def print_players():
+    for player in players:
+        print(player, end=", ")
+    print()
+
+def __str__(self):
+    return "foo"

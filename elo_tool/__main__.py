@@ -1,3 +1,9 @@
+# Todo: figure out program design
+#       fix config.py
+#       cleanup parser
+#       implement notion of current game(s)
+#       add elo algorithm
+
 import sys
 
 from elo_tool import parser, config
@@ -22,8 +28,13 @@ def run():
 
 
 def exit_program():
-    print("\nexiting" + COLOR.DEFAULT)
-    sys.exit()
+    print("Are you sure you want to exit?")
+    answer = ""
+    while answer != "n" and answer != "no":
+        answer = input("[y/n] ").lower()
+        if answer == "y" or answer == "yes":
+            print("\nexiting" + COLOR.DEFAULT)
+            sys.exit()
 
 
 def main():
