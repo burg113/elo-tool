@@ -67,18 +67,17 @@ def load_config(path):
         raise FileNotFoundError(f"No config file at {path}")
 
     with open(path, "r") as config_file:
-        print("_" * 100)
-        print(config_file.read())
-        print("_" * 100)
-
         config = toml.load(path)
-        print(config)
-        print("_" * 100)
 
         apply_config(config)
 
         game = game_state()
         pass
+
+
+def save_config(path):
+
+    raise Exception("Not Implemented!")
 
 
 def game_state():

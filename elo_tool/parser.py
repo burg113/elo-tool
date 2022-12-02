@@ -1,5 +1,6 @@
 import getopt
 import sys
+import elo_tool.other.colors as color
 
 from elo_tool import config
 
@@ -10,22 +11,31 @@ def print_help():
     print(HELP_RESPONSE)
 
 
-SHORT_OPTIONS = {
+ARGS_SHORT = {
     "h": 0,
     "c": 1,
 
 }
 
-LONG_OPTIONS = {
+ARGS_LONG = {
     "help": 0,
     "config": 1,
+    "loadconfig": 1,
+
+}
+
+COMMANDS = {
+    "h": 0,
+    "help": 0,
+    "config": 1,
+    "loadconfig": 1
 
 }
 
 OPTION_PROPERTIES = [
-    [False, print_help],
-    [True, config.load_config],
-
+    ["help", False, print_help],
+    ["load config", True, config.load_config],
+    ["save config", True, config.save_config]
 ]
 
 
@@ -34,28 +44,56 @@ def parse_args():
     args = ([], [])
     try:
         args = getopt.gnu_getopt(raw_args,
-                                 "".join([k + ":" if OPTION_PROPERTIES[SHORT_OPTIONS[k]][0] else k
-                                          for k in SHORT_OPTIONS.keys()]),
-                                 [k + "=" if OPTION_PROPERTIES[LONG_OPTIONS[k]][0] else k for k in LONG_OPTIONS.keys()])
+                                 "".join([k + ":" if OPTION_PROPERTIES[ARGS_SHORT[k]][1] else k
+                                          for k in ARGS_SHORT.keys()]),
+                                 [k + "=" if OPTION_PROPERTIES[ARGS_LONG[k]][1] else k for k in ARGS_LONG.keys()])
     except getopt.GetoptError as e:
         print(e)
-        print('\033[93m' + "The programm will execute without arguments" + '\033[0m')
+        print(color.WARNING + "The programm will execute without arguments" + color.DEFAULT)
 
     options, other = args
 
     if len(other) > 0:
-        print('\033[93m' + f"{other} will be ignored" + '\033[0m')
+        print(color.WARNING + f"{other} will be ignored" + color.DEFAULT)
 
+    print(color.ALT_COLOR + "Executing with:")
     for option in options:
         name, arg = option
-        num = SHORT_OPTIONS[name[1:]] if name[1:] in SHORT_OPTIONS else LONG_OPTIONS[name[2:]]
+        num = ARGS_SHORT[name[1:]] if name[1:] in ARGS_SHORT else ARGS_LONG[name[2:]]
         option_properties = OPTION_PROPERTIES[num]
-        if not option_properties[0]:
+        if not option_properties[1]:
             arg = None
-
-        print(f"option: {name}, arg: {arg}")
+            print(f"{option_properties[0]}, ignoring argument: {arg} as {option_properties[0]} requires no argument")
+        else:
+            print(f"{option_properties[0]} {arg}")
 
         if arg is None:
-            option_properties[1]()
+            option_properties[2]()
         else:
-            option_properties[1](arg)
+            option_properties[2](arg)
+    print(color.DEFAULT, end="")
+
+
+def parse_input(input_string):
+    command, arg = None, None
+    if " " in input_string:
+        command, arg = input_string.split(" ", 1)
+        command = command.strip()
+        arg = arg.strip()
+
+    else:
+        command = input_string.strip()
+
+    print(command, "#", arg)
+    if command not in COMMANDS:
+        print(f"'{command}' no such command exists")
+        return False
+
+    command_id = COMMANDS[command]
+    if OPTION_PROPERTIES[command_id][1]:
+        OPTION_PROPERTIES[command_id][2](arg)
+    else:
+        OPTION_PROPERTIES[command_id][2]()
+
+    return True
+
