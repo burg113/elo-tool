@@ -2,13 +2,23 @@ import getopt
 import sys
 import elo_tool.other.colors as color
 
-from elo_tool import config
+from elo_tool import config, __main__
 
-HELP_RESPONSE = "hi! i will help you eventually. But sadly not currently."
+HELP_RESPONSE = "hi! i will help you eventually. But sadly not currently. ¯\\_(ツ)_/¯ "
+
+flag = 0
+FLAGS = {
+    "exit": -1
+}
 
 
 def print_help():
     print(HELP_RESPONSE)
+
+
+def set_flag(val):
+    global flag
+    flag = val
 
 
 ARGS_SHORT = {
@@ -19,24 +29,28 @@ ARGS_SHORT = {
 
 ARGS_LONG = {
     "help": 0,
-    "config": 1,
-    "loadconfig": 1,
+    "config": 10,
+    "loadconfig": 10,
 
 }
 
 COMMANDS = {
     "h": 0,
     "help": 0,
-    "config": 1,
-    "loadconfig": 1
+    "exit": 1,
+    "exit()": 1,
+    "config": 10,
+    "loadconfig": 10
 
 }
 
-OPTION_PROPERTIES = [
-    ["help", False, print_help],
-    ["load config", True, config.load_config],
-    ["save config", True, config.save_config]
-]
+OPTION_PROPERTIES = {
+    0: ["help", False, print_help],
+    1: ["exit", False, lambda: set_flag(-1)],
+
+    10: ["load config", True, config.load_config],
+    11: ["save config", True, config.save_config]
+}
 
 
 def parse_args():
@@ -49,7 +63,7 @@ def parse_args():
                                  [k + "=" if OPTION_PROPERTIES[ARGS_LONG[k]][1] else k for k in ARGS_LONG.keys()])
     except getopt.GetoptError as e:
         print(e)
-        print(color.WARNING + "The programm will execute without arguments" + color.DEFAULT)
+        print(color.WARNING + "The program will execute without arguments" + color.DEFAULT)
 
     options, other = args
 
@@ -62,10 +76,14 @@ def parse_args():
         num = ARGS_SHORT[name[1:]] if name[1:] in ARGS_SHORT else ARGS_LONG[name[2:]]
         option_properties = OPTION_PROPERTIES[num]
         if not option_properties[1]:
+            if arg is not None and arg != "":
+                print(
+                    f'{option_properties[0]}, ignoring argument: {arg} as {option_properties[0]} requires no argument')
+            else:
+                print(option_properties[0])
             arg = None
-            print(f"{option_properties[0]}, ignoring argument: {arg} as {option_properties[0]} requires no argument")
         else:
-            print(f"{option_properties[0]} {arg}")
+            print(f'{option_properties[0]} \t\t {arg}')
 
         if arg is None:
             option_properties[2]()
@@ -75,6 +93,8 @@ def parse_args():
 
 
 def parse_input(input_string):
+    if len(input_string.strip()) == 0:
+        return
     command, arg = None, None
     if " " in input_string:
         command, arg = input_string.split(" ", 1)
@@ -87,7 +107,7 @@ def parse_input(input_string):
     print(command, "#", arg)
     if command not in COMMANDS:
         print(f"'{command}' no such command exists")
-        return False
+        return 0
 
     command_id = COMMANDS[command]
     if OPTION_PROPERTIES[command_id][1]:
@@ -95,5 +115,6 @@ def parse_input(input_string):
     else:
         OPTION_PROPERTIES[command_id][2]()
 
-    return True
-
+    if FLAGS["exit"] == flag:
+        return -1
+    return 1

@@ -6,15 +6,20 @@ import elo_tool.other.data as DATA
 
 
 def initialize():
-
     config.initialize()
 
     parser.parse_args()
 
-def run():
-    input_string = input(">>")
 
-    parser.parse_input(input_string)
+def run():
+    while True:
+        input_string = input(">>")
+
+        result = parser.parse_input(input_string)
+
+        if result == -1:
+            exit_program()
+
 
 def exit_program():
     print("\nexiting" + COLOR.DEFAULT)
@@ -22,10 +27,9 @@ def exit_program():
 
 
 def main():
+    print('\033[2J')
 
     initialize()
-
-    print('\033[2J')
 
     print(DATA.LOGO)
 
@@ -33,4 +37,3 @@ def main():
         run()
     except KeyboardInterrupt:
         exit_program()
-

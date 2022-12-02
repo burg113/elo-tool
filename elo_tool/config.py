@@ -63,8 +63,9 @@ def apply_config(config):
 
 
 def load_config(path):
-    if not os.path.isfile(path):
-        raise FileNotFoundError(f"No config file at {path}")
+    if not os.path.isfile(str(path)):
+        print(f"No config file at '{path}'")
+        return
 
     with open(path, "r") as config_file:
         config = toml.load(path)
