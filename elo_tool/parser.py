@@ -2,7 +2,7 @@ import getopt
 import sys
 import elo_tool.other.colors as color
 
-from elo_tool import config, __main__
+from elo_tool import config
 
 HELP_RESPONSE = "hi! i will help you eventually. But sadly not currently.¯\\_(._.)_/¯"
 

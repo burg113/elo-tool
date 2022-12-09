@@ -1,5 +1,3 @@
-# Todo: refactor
-
 import os.path
 
 import toml
@@ -14,70 +12,24 @@ players = DEFAULT_Players
 player_elo = {}
 
 
-def set_game_name(name):
-    global game_name
-    game_name = name
+def load_config(path):
+    if not os.path.isfile(str(path)):
+        print(f"No config file at '{path}'")
+        return
+
+    content = {}
+    with open(path, "r") as config_file:
+        apply_config(toml.load(path))
 
 
-def set_default_elo(def_elo):
-    global default_elo
-    default_elo = def_elo
+def save_config(path: str):
+    content = {"name": game_name,
+               "default_elo": default_elo,
+               "players": players,
+               "elo": player_elo}
 
-
-def set_players(player_list):
-    global players, player_elo, default_elo
-    players = []
-    player_elo = {}
-
-    for player in player_list:
-
-        if player in players:
-            raise ValueError(f"player: {player} already in player list: {players}")
-
-        players.append(player)
-
-
-def set_elo(elo_dict):
-    global player_elo, players
-    player_elo = elo_dict
-
-    for player in players:
-        if player not in player_elo:
-            player_elo[player] = default_elo
-
-
-args = {
-    "default_elo": (set_default_elo, DEFAULT_ELO),
-    "name": (set_game_name, DEFAULT_GAME_NAME),
-    "players": (set_players, DEFAULT_Players),
-    "elo": (set_elo, default_elo),
-}
-
-
-class Config:
-    # content, header
-    def __init__(self, path=None, content=None, header: str = ""):
-        if content is None:
-            content = {}
-        self.content = content
-        self.header = header
-        if path is not None:
-            self.load(path)
-
-    def load(self, path):
-        if not os.path.isfile(str(path)):
-            print(f"No config file at '{path}'")
-            return
-
-        with open(path, "r") as config_file:
-            self.content = toml.load(path)
-
-    def write(self, path, flag="w"):
-        with open(path, flag) as file:
-            file.write(self.header + "\n" + toml.dumps(self.content))
-
-    def __str__(self):
-        return str(self.content)
+    with open(path, "w") as file:
+        file.write(toml.dumps(content))
 
 
 def initialize():
@@ -90,24 +42,65 @@ def apply_config(config):
         fnc(config[arg] if arg in config else default)
 
 
-def load_config(path):
-    config = Config(str(path))
-
-    apply_config(config.content)
-
-
-def generate_config() -> Config:
-    config = Config(header="# this is a automatically generated config\n\n")
-    config.content = {"name": game_name,
-                      "default_elo": default_elo,
-                      "players": players,
-                      "elo": player_elo}
-
-    return config
+def set_game_name(name):
+    global game_name
+    game_name = name
 
 
-def save_config(path: str):
-    generate_config().write(path)
+def set_default_elo(def_elo):
+    global default_elo
+    default_elo = def_elo
+
+
+def set_players(player_list: list):
+    global players, player_elo, default_elo
+    players = []
+    player_elo = {}
+
+    add_players(player_list)
+
+
+def add_player(player: str):
+    global players
+    if player in players:
+        raise ValueError(f"player: {player} already in player list: {players}")
+
+    players.append(player)
+
+
+def add_players(player_list: list):
+    for player in player_list:
+        add_player(player)
+
+
+def set_elo(elo_dict):
+    global player_elo, players
+    player_elo = elo_dict
+
+    for player in players:
+        if player not in player_elo:
+            player_elo[player] = default_elo
+
+
+def set_elo(player: str, elo: int):
+    global player_elo, players
+
+    if player not in players:
+        raise ValueError(f"player: {player} is not in player list: {players}")
+
+    player_elo[player] = elo
+
+
+def reset_elo(player: str):
+    set_elo(player, DEFAULT_ELO)
+
+
+args = {
+    "default_elo": (set_default_elo, DEFAULT_ELO),
+    "name": (set_game_name, DEFAULT_GAME_NAME),
+    "players": (set_players, DEFAULT_Players),
+    "elo": (set_elo, default_elo),
+}
 
 
 def game_state():
@@ -129,6 +122,3 @@ def print_players():
     for player in players:
         print(player, end=", ")
     print()
-
-def __str__(self):
-    return "foo"

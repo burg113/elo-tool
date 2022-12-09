@@ -1,5 +1,4 @@
-# Todo: figure out program design
-#       fix config.py
+# Todo:
 #       cleanup parser
 #       implement notion of current game(s)
 #       add elo algorithm
